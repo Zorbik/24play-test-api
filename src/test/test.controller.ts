@@ -10,15 +10,11 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common/decorators';
-import { NotFoundException, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 
 import { TestService } from './test.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CreateTestDto } from './dto/create-test.dto';
-import {
-  CATEGORY_NOT_FOUND_ERROR,
-  TEST_NOT_FOUND_ERROR,
-} from './test.constants';
 import { IdValidationPipe } from '../pipes/id-validation.pipe';
 
 @Controller('test')
@@ -35,21 +31,13 @@ export class TestController {
   @UseGuards(JwtAuthGuard)
   @Get(':category')
   async get(@Param('category') category: string) {
-    const array = await this.testService.getTest(category);
-    if (!array.length) {
-      throw new NotFoundException(CATEGORY_NOT_FOUND_ERROR);
-    }
-    return array;
+    return await this.testService.getTest(category);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id', IdValidationPipe) id: string) {
-    const deletedId = await this.testService.delete(id);
-    if (!deletedId) {
-      throw new NotFoundException(TEST_NOT_FOUND_ERROR);
-    }
-    return deletedId;
+    return await this.testService.delete(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -59,11 +47,7 @@ export class TestController {
     @Param('id', IdValidationPipe) id: string,
     @Body() dto: CreateTestDto,
   ) {
-    const updatedTest = await this.testService.updateById(id, dto);
-    if (!updatedTest) {
-      throw new NotFoundException(TEST_NOT_FOUND_ERROR);
-    }
-    return updatedTest;
+    return await this.testService.updateById(id, dto);
   }
 
   @Get('search')

@@ -48,10 +48,10 @@ export class AuthController {
     await this.authService.logOutUser(id);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('statistic')
-  async get() {
-    return await this.authService.getStatistic();
+  // @UseGuards(JwtAuthGuard)
+  @Get('statistic/:category')
+  async get(@Param('category') category: string) {
+    return await this.authService.getStatistic(category);
   }
 
   @UseGuards(JwtAuthGuard)

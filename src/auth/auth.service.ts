@@ -87,8 +87,31 @@ export class AuthService {
     user.save();
   }
 
-  async getStatistic() {
-    return await this.userModel.find();
+  async getStatistic(category: string) {
+    return await this.userModel.aggregate([
+      {
+        $match: {
+          'statistics.category': category,
+        },
+      },
+      {
+        $unwind: '$statistics',
+      },
+      {
+        $match: {
+          'statistics.category': category,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          category: '$statistics.category',
+          questions: '$statistics.questions',
+          answers: '$statistics.answers',
+        },
+      },
+    ]);
   }
 
   async deleteUser(id: string) {

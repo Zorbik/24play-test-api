@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateTestDto } from './dto/create-test.dto';
 import { Test, TestDocument } from './test.model';
+import {
+  CATEGORY_NOT_FOUND_ERROR,
+  TEST_NOT_FOUND_ERROR,
+} from './test.constants';
 
 @Injectable()
 export class TestService {
@@ -16,9 +20,15 @@ export class TestService {
   }
 
   async getTest(category: string): Promise<Test[]> {
-    return await this.testModel
+    const array = await this.testModel
       .aggregate([{ $match: { category } }, { $sample: { size: 3 } }])
       .exec();
+
+    if (!array.length) {
+      throw new NotFoundException(CATEGORY_NOT_FOUND_ERROR);
+    }
+
+    return array;
   }
 
   async search(query: string): Promise<Test[]> {
@@ -29,11 +39,25 @@ export class TestService {
       .exec();
   }
 
-  async delete(id: string): Promise<string | null> {
-    return await this.testModel.findByIdAndDelete(id);
+  async delete(id: string) {
+    const deletedId = await this.testModel.findByIdAndDelete(id);
+
+    if (!deletedId) {
+      throw new NotFoundException(TEST_NOT_FOUND_ERROR);
+    }
+
+    return deletedId;
   }
 
-  async updateById(id: string, dto: CreateTestDto): Promise<Test | null> {
-    return await this.testModel.findByIdAndUpdate(id, dto, { new: true });
+  async updateById(id: string, dto: CreateTestDto): Promise<Test> {
+    const updatedTest = await this.testModel.findByIdAndUpdate(id, dto, {
+      new: true,
+    });
+
+    if (!updatedTest) {
+      throw new NotFoundException(TEST_NOT_FOUND_ERROR);
+    }
+
+    return updatedTest;
   }
 }
