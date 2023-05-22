@@ -25,6 +25,17 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async getUser(token: string) {
+    const [, splitedToken] = token.split(' ');
+    const user = await this.userModel.findOne({ token: splitedToken });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    return user;
+  }
+
   async createUser(dto: CreateUserDto) {
     const isUser = await this.findUser(dto.email);
 

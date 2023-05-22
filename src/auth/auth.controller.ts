@@ -4,6 +4,7 @@ import {
   Body,
   Delete,
   Get,
+  Headers,
   HttpCode,
   Param,
   Patch,
@@ -20,6 +21,12 @@ import { JwtAuthGuard } from './guards/jwt.guard';
 @Controller('user')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('current')
+  async refresh(@Headers('authorization') token: string) {
+    return await this.authService.getUser(token);
+  }
 
   @UsePipes(new ValidationPipe())
   @Post('signup')
@@ -48,7 +55,7 @@ export class AuthController {
     await this.authService.logOutUser(id);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('statistic/:category')
   async get(@Param('category') category: string) {
     return await this.authService.getStatistic(category);
