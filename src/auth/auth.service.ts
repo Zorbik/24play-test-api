@@ -67,7 +67,10 @@ export class AuthService {
     const email = await this.validateUser(dto.email, dto.password);
 
     const user = await this.userModel
-      .findOne({ email }, { __v: 0, password: 0 })
+      .findOne(
+        { email: new RegExp(`^${email}$`, 'i') },
+        { __v: 0, password: 0 },
+      )
       .exec();
 
     const token = await this.jwtService.signAsync({ email });
@@ -144,6 +147,8 @@ export class AuthService {
   }
 
   async findUser(email: string) {
-    return await this.userModel.findOne({ email }).exec();
+    return await this.userModel
+      .findOne({ email: new RegExp(`^${email}$`, 'i') })
+      .exec();
   }
 }

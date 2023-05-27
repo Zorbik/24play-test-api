@@ -21,7 +21,10 @@ export class TestService {
 
   async getTest(category: string): Promise<Test[]> {
     const array = await this.testModel
-      .aggregate([{ $match: { category } }, { $sample: { size: 3 } }])
+      .aggregate([
+        { $match: { category: new RegExp(`^${category}$`, 'i') } },
+        { $sample: { size: 3 } },
+      ])
       .exec();
 
     if (!array.length) {
